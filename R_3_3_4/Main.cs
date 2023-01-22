@@ -35,8 +35,7 @@ namespace R_3_3_4
             //Код заполнения нового параметра
             IList<Pipe> pipeList = null;
             pipeList = new FilteredElementCollector(doc, doc.ActiveView.Id)
-            .OfCategory(BuiltInCategory.OST_PipeCurves)
-            .WhereElementIsNotElementType()
+            .OfClass(typeof(Pipe))
             .Cast<Pipe>()
             .ToList();
 
@@ -58,7 +57,7 @@ namespace R_3_3_4
                             double rMinhValue = UnitUtils.ConvertFromInternalUnits(rMaxParametr.AsDouble(), /*UnitTypeId.Meters*/ DisplayUnitType.DUT_METERS);
                             double rMin = rMinhValue/*.AsDouble()*/;
                             Parameter rMaxMinParametr = pipeInstance.LookupParameter("Внешний/Внутренний диаметр");
-                            rMaxMinParametr.Set($"{rMax}/{rMin}");
+                            rMaxMinParametr.Set($"Труба {rMax}/{rMin}");
                         }
                         
                     }
@@ -75,14 +74,15 @@ namespace R_3_3_4
             string parameterName, CategorySet categorySet,
             BuiltInParameterGroup builtInParameterGroup, bool isInstance)
         {
-            DefinitionFile definitionFile = application.OpenSharedParameterFile();
+            DefinitionFile defFile = application.OpenSharedParameterFile();
 
-            if (definitionFile == null)
+            if (defFile == null)
             {
                 TaskDialog.Show("Ошибка", "Не найден файл общих параметров");
                 return;
             }
-            Definition definition = definitionFile.Groups.SelectMany(group => group.Definitions)
+            Definition definition = defFile.Groups
+                .SelectMany(group => group.Definitions)
                 .FirstOrDefault(def => def.Name.Equals(parameterName));
             if (definition == null)
             {
